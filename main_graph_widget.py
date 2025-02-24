@@ -80,8 +80,9 @@ if __name__ == "__main__":
     graph_widget: GraphWidget = GraphWidget()
     w: MainGraphWidget = MainGraphWidget(logger)
     run_widget: RunMaesWidget =  RunMaesWidget()
+    run_widget2: RunMaesWidget =  RunMaesWidget()
     osc_widgets =  {"Измерение": run_widget}
-    widget_model: Dict[str, Dict[str, QWidget]] = {"Осциллограммы": osc_widgets}
+    widget_model: Dict[str, Dict[str, QWidget]] = {"Осциллограмма": osc_widgets}
     init_graph_window(w.mainGridLayout, graph_widget, widget_model)
     # spacer_g = QSpacerItem(0, 0, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
     # spacer_v = QSpacerItem(0, 0, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
