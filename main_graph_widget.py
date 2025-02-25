@@ -11,11 +11,11 @@ import asyncio
 from pathlib import Path
 from typing import Dict
 
-from modbus_worker import ModbusWorker                     
-from ddii_command import ModbusCMCommand, ModbusMPPCommand 
-from log_config import log_init
-from tabWidget_maker import init_graph_window, create_tab_widget_items                        
-from graph_widget import GraphWidget    
+# from modbus_worker import ModbusWorker
+# from ddii_command import ModbusCMCommand, ModbusMPPCommand
+# from log_config import log_init
+from tabWidget_maker import init_graph_window, create_tab_widget_items
+from graph_widget import GraphWidget
 from run_meas_widget import RunMaesWidget
 
 
@@ -36,22 +36,21 @@ class MainGraphWidget(QtWidgets.QDialog):
     #CM_DBG_GET_VOLTAGE = 0x0009
     #CMD_HVIP_ON_OFF = 0x000B
 
-    def __init__(self, logger, *args) -> None:
+    def __init__(self, *args) -> None:
         super().__init__()
         loadUi(Path(__file__).parent.joinpath('DialogGraphWidget2.ui'), self)
-        self.mw = ModbusWorker()
-        self.logger = logger
-        self.flg_get_rst = 0
-        if __name__ == "__main__":
-            # self.w_ser_dialog: SerialConnect = args[0]
+        # self.mw = ModbusWorker()
+        # self.logger = args[0]
+        # self.flg_get_rst = 0
+        # if __name__ == "__main__":
+            # self.w_ser_dialog: SerialConnect = args[1]
             # self.resize(self.w_ser_dialog.size())
             # self.w_ser_dialog.coroutine_finished.connect(self.get_client)
-            pass
-        else:
-            self.client: AsyncModbusSerialClient = args[0]
-            self.cm_cmd: ModbusCMCommand = ModbusCMCommand(self.client, self.logger)
-            self.mpp_cmd: ModbusMPPCommand = ModbusMPPCommand(self.client, self.logger)
-        self.task = None # type: ignore
+        # else:
+            # self.client: AsyncModbusSerialClient = args[1]
+            # self.cm_cmd: ModbusCMCommand = ModbusCMCommand(self.client, self.logger)
+            # self.mpp_cmd: ModbusMPPCommand = ModbusMPPCommand(self.client, self.logger)
+        # self.task = None # type: ignore
         # self.pushButton_OK.clicked.connect(self.pushButton_OK_handler)
         # self.coroutine_get_temp_finished.connect(self.creator_task)
         # # инициализация структур обновляемых полей приложения
@@ -76,13 +75,13 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     qtmodern.styles.dark(app)
     # light(app)
-    logger = log_init()
+    # logger = log_init()
     graph_widget: GraphWidget = GraphWidget()
-    w: MainGraphWidget = MainGraphWidget(logger)
+    w: MainGraphWidget = MainGraphWidget()
     run_widget: RunMaesWidget =  RunMaesWidget()
     run_widget2: RunMaesWidget =  RunMaesWidget()
-    osc_widgets =  {"Измерение": run_widget}
-    widget_model: Dict[str, Dict[str, QWidget]] = {"Осциллограмма": osc_widgets}
+    osc_widgets: Dict[str, QWidget] =  {"Запуск": run_widget}
+    widget_model: Dict[str, Dict[str, QWidget]] = {"Измерение": osc_widgets}
     init_graph_window(w.mainGridLayout, graph_widget, widget_model)
     # spacer_g = QSpacerItem(0, 0, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
     # spacer_v = QSpacerItem(0, 0, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
