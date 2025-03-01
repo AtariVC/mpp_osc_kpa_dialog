@@ -15,6 +15,7 @@ from loguru import logger
 try:
     from kpa_parser.modbus_frame import crc16
     from kpa_parser.modbus_frame.packet_types import ModbusFrame
+    from kpa_parser.modbus_frame.stream_decoder import ModbusStreamDecoder
 except ImportError:
     pass
 ######### Для отдельного запуска модуля #############
@@ -54,6 +55,7 @@ class RunMaesWidget(QtWidgets.QDialog):
         loadUi(Path(__file__).parent.joinpath('WidgetRunMeasure.ui'), self)
         # self.mw = ModbusWorker()
         # self.parser = Parsers()
+        self.modbus_stream: ModbusStreamDecoder = ModbusStreamDecoder()
         self.task = None
         # self.client = args[0]
         if __name__ != "__main__":
@@ -93,7 +95,7 @@ class RunMaesWidget(QtWidgets.QDialog):
             print(e)
 
     async def get_mpp_osc_data(self, data: bytes):
-        frames: list[ModbusFrame] = self.client.modbus_stream.get_modbus_packets(data)
+        frames: list[ModbusFrame] = self.modbus_stream.get_modbus_packets(data)
         if len(frames) > 0:
             print(frames)
 
