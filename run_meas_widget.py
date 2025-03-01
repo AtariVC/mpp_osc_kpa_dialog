@@ -100,6 +100,9 @@ class RunMaesWidget(QtWidgets.QDialog):
         cmd_code = 16
         self.client._gen_modbus_packet(addr, cmd_code, read_amount, first_reg, "")
 
+    def closeEvent(self) -> None:
+        self.client.unsubscribe(self.get_mpp_osc_data)
+
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     qtmodern.styles.dark(app)
