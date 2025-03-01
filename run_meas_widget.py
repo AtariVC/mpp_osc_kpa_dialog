@@ -68,12 +68,12 @@ class RunMaesWidget(QtWidgets.QDialog):
         try:
             self.client = args[0]
             self.modbus_stream: ModbusStreamDecoder = ModbusStreamDecoder()
+            self.client.module_driver.uart1.received.subscribe(self.get_mpp_osc_data)
         except:
             pass
         # self.pushButton_autorun.clicked.connect(self.pushButton_autorun_handler)
         self.pushButton_run.clicked.connect(self.pushButton_run_handler)
         # self.pushButton_forced_meas.clicked.connect(self.pushButton_forced_meas_handler)
-        self.client.module_driver.uart1.received.subscribe(self.get_mpp_osc_data)
 
         # self.checkBox_enable_test_csa.clicked.connect(self.checkBox_enable_test_csa_handler)
 
