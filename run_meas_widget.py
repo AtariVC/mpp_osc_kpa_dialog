@@ -139,6 +139,7 @@ class RunMaesWidget(QtWidgets.QDialog):
             except Exception as err:
                 logger.warning(err)
                 self.forced_meas_process_flag = 0
+                break
 
 
     @qasync.asyncSlot()
