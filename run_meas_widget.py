@@ -105,16 +105,23 @@ class RunMaesWidget(QtWidgets.QDialog):
             self.client.module_driver.uart1.received.unsubscribe(self.get_mpp_osc_data)
             self.forced_meas_process_flag = 0
 
-
+    @qasync.asyncSlot()
     async def get_mpp_osc_data(self, data: bytes):
         frames: list[ModbusFrame] = self.modbus_stream.get_modbus_packets(data)
         if len(frames) > 0:
             print(frames)
 
+    @qasync.asyncSlot()
     async def cmd_mpp_read_osc(self, first_reg, read_amount):
         addr = int(self.lineEdit_ID.text())
         cmd_code = 0x03
-        self.client._gen_modbus_packet(addr, cmd_code, read_amount, first_reg, "")
+        try:
+            tx_data = self.client._gen_modbus_packet(addr, cmd_code, read_amount, first_reg, "")
+            await self.client.uart.send(data_bytes=tx_data)
+        except Exception as err:
+            logger.error(err)
+
+
 
 
 
