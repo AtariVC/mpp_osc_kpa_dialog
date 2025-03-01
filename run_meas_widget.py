@@ -60,6 +60,11 @@ class RunMaesWidget(QtWidgets.QDialog):
             # self.cm_cmd: ModbusCMCommand = ModbusCMCommand(self.client, self.logger)
             # self.mpp_cmd: ModbusMPPCommand = ModbusMPPCommand(self.client, self.logger)
             pass
+        try:
+            self.client = args[0]
+            print(self.client)
+        except:
+            pass
         # self.pushButton_autorun.clicked.connect(self.pushButton_autorun_handler)
         self.pushButton_run_trig_pips.clicked.connect(self.pushButton_run_trig_pips_handler)
         self.pushButton_forced_meas.clicked.connect(self.pushButton_forced_meas_handler)
