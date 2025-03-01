@@ -135,8 +135,10 @@ class RunMaesWidget(QtWidgets.QDialog):
                 else:
                     first_reg = 0xA000
                     await self.mpp_forced_launch(addr, 0)
+                self.forced_meas_process_flag = 0
             except Exception as err:
                 logger.warning(err)
+                self.forced_meas_process_flag = 0
 
 
     @qasync.asyncSlot()
