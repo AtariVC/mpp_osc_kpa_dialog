@@ -55,7 +55,7 @@ class RunMaesWidget(QtWidgets.QDialog):
         loadUi(Path(__file__).parent.joinpath('WidgetRunMeasure.ui'), self)
         # self.mw = ModbusWorker()
         # self.parser = Parsers()
-        self.modbus_stream: ModbusStreamDecoder = ModbusStreamDecoder()
+
         self.task = None
         self.forced_meas_process_flag = 0
         # self.client = args[0]
@@ -67,7 +67,7 @@ class RunMaesWidget(QtWidgets.QDialog):
             pass
         try:
             self.client = args[0]
-
+            self.modbus_stream: ModbusStreamDecoder = ModbusStreamDecoder()
         except:
             pass
         # self.pushButton_autorun.clicked.connect(self.pushButton_autorun_handler)
