@@ -59,6 +59,7 @@ class RunMaesWidget(QtWidgets.QDialog):
         self.task = None
         self.forced_meas_process_flag = 0
         self.id = int(self.lineEdit_ID.text())
+        self.pushButton_run.setEnabled(False)
         # self.client = args[0]
         if __name__ != "__main__":
             # self.client = args[0]
@@ -94,7 +95,7 @@ class RunMaesWidget(QtWidgets.QDialog):
         if self.forced_meas_process_flag == 0:
             self.forced_meas_process_flag = 1
             self.pushButton_forced_meas.setText("Остановить")
-            self.pushButton_run.setEnabled(False)
+            # self.pushButton_run.setEnabled(False)
             try:
                 await self.cmd_mpp_read_osc()
             except Exception as e:
@@ -111,7 +112,7 @@ class RunMaesWidget(QtWidgets.QDialog):
         if len(frames) > 0:
             for frame in frames:
                 if frame.device_id == self.id and hasattr(frame, 'data'):
-                    if len(frame.data) == AMNT_RD_RG:
+                    if len(frame.data) == AMNT_RD_RG*2:
                         print(frame.data.hex(" ").upper())
 
     @qasync.asyncSlot()
@@ -124,6 +125,7 @@ class RunMaesWidget(QtWidgets.QDialog):
         else:
             logger.warning(f"addr = {self.id} is not [2..7] or not num")
         cmd_code = 0x03
+        await self.forced_mpp_launch(addr, 0)
         while self.forced_meas_process_flag == 1:
             try:
                 tx_data = self.client._gen_modbus_packet(addr, cmd_code, read_amount, first_reg, "")
@@ -132,12 +134,15 @@ class RunMaesWidget(QtWidgets.QDialog):
                     first_reg += 64
                 else:
                     first_reg = 0xA000
+                    await self.forced_mpp_launch(addr, 0)
             except Exception as err:
-                logger.warning()(err)
+                logger.warning(err)
 
 
-    def forced_mpp_launch(self):
-        self.client._gen_modbus_packet(addr, cmd_code, read_amount, first_reg, "")
+    @qasync.asyncSlot()
+    async def forced_mpp_launch(self, addr, ch):
+        tx_data = self.client._gen_modbus_packet(addr, 0x06, 0, 0x0001, f"0{ch} 51")
+        await self.client.uart.send(data_bytes=tx_data)
 
 
 
