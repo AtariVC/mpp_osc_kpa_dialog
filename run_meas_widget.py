@@ -121,11 +121,11 @@ class RunMaesWidget(QtWidgets.QDialog):
         read_amount = AMNT_RD_RG
         self.id = int(self.lineEdit_ID.text())
         if 2 < self.id < 7:
-            addr = self.id
+            addr: int = self.id
         else:
             logger.warning(f"addr = {self.id} is not [2..7] or not num")
         cmd_code = 0x03
-        await self.forced_mpp_launch(addr, 0)
+        await self.mpp_forced_launch(addr, 0)
         while self.forced_meas_process_flag == 1:
             try:
                 tx_data = self.client._gen_modbus_packet(addr, cmd_code, read_amount, first_reg, "")
@@ -134,14 +134,15 @@ class RunMaesWidget(QtWidgets.QDialog):
                     first_reg += 64
                 else:
                     first_reg = 0xA000
-                    await self.forced_mpp_launch(addr, 0)
+                    await self.mpp_forced_launch(addr, 0)
             except Exception as err:
                 logger.warning(err)
 
 
     @qasync.asyncSlot()
-    async def forced_mpp_launch(self, addr, ch):
-        tx_data = self.client._gen_modbus_packet(addr, 0x06, 0, 0x0001, f"0{ch} 51")
+    async def mpp_forced_launch(self, addr:int, ch):
+        tx = 0x51 | (ch<<8)
+        tx_data = self.client._gen_modbus_packet(addr, 0x06, 0x0, 0x0001, tx)
         await self.client.uart.send(data_bytes=tx_data)
 
 
