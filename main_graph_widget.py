@@ -11,6 +11,7 @@ import asyncio
 from pathlib import Path
 from typing import Dict
 import sys
+from loguru import logger
 
 graph_widget_path = Path(__file__).parent
 # Добавляем папку src в sys.path
@@ -55,15 +56,15 @@ class MainGraphWidget(QtWidgets.QDialog):
         loadUi(Path(__file__).parent.joinpath('DialogGraphWidget2.ui'), self)
         try:
             self.client = args[0]
-            run_widget: RunMaesWidget =  RunMaesWidget(self.client)
+            self.run_widget: RunMaesWidget =  RunMaesWidget(self.client)
         except:
-            run_widget: RunMaesWidget =  RunMaesWidget()
+            self.run_widget: RunMaesWidget =  RunMaesWidget()
             # self.cm_cmd: ModbusCMCommand = ModbusCMCommand(self.client, self.logger)
             # self.mpp_cmd: ModbusMPPCommand = ModbusMPPCommand(self.client, self.logger)
         # self.mw = ModbusWorker()
         # self.logger = log_init()
         graph_widget: GraphWidget = GraphWidget()
-        osc_widgets =  {"Измерение": run_widget}
+        osc_widgets =  {"Измерение": self.run_widget}
         widget_model: Dict[str, Dict[str, QWidget]] = {"Осциллограмма": osc_widgets}
         init_graph_window(self.mainGridLayout, graph_widget, widget_model)
         self.flg_get_rst = 0
@@ -88,6 +89,11 @@ class MainGraphWidget(QtWidgets.QDialog):
 
     #     if self.w_ser_dialog.status_CM == 1:
     #         self.coroutine_get_temp_finished.emit()
+    def closeEvent(self, event) -> None:
+        try:
+            self.client.module_driver.uart1.received.unsubscribe(self.run_widget.get_mpp_osc_data)
+        except Exception as e:
+            logger.warning(e)
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)

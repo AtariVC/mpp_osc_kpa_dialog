@@ -101,11 +101,7 @@ class RunMaesWidget(QtWidgets.QDialog):
         cmd_code = 16
         self.client._gen_modbus_packet(addr, cmd_code, read_amount, first_reg, "")
 
-    def closeEvent(self, event) -> None:
-        try:
-            self.client.module_driver.uart1.received.unsubscribe(self.get_mpp_osc_data)
-        except Exception as e:
-            logger.warning(e)
+
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
