@@ -58,6 +58,7 @@ class RunMaesWidget(QtWidgets.QDialog):
 
         self.task = None
         self.forced_meas_process_flag = 0
+        self.id = int(self.lineEdit_ID.text())
         # self.client = args[0]
         if __name__ != "__main__":
             # self.client = args[0]
@@ -117,7 +118,11 @@ class RunMaesWidget(QtWidgets.QDialog):
     async def cmd_mpp_read_osc(self):
         first_reg = 0xA000
         read_amount = AMNT_RD_RG
-        addr = int(self.lineEdit_ID.text())
+        self.id = int(self.lineEdit_ID.text())
+        if 2 < self.id < 7:
+            addr = self.id
+        else:
+            logger.warning(f"addr = {self.id} is not [2..7] or not num")
         cmd_code = 0x03
         while self.forced_meas_process_flag == 1:
             try:
@@ -128,7 +133,11 @@ class RunMaesWidget(QtWidgets.QDialog):
                 else:
                     first_reg = 0xA000
             except Exception as err:
-                logger.error(err)
+                logger.warning()(err)
+
+
+    def forced_mpp_launch(self):
+        self.client._gen_modbus_packet(addr, cmd_code, read_amount, first_reg, "")
 
 
 
