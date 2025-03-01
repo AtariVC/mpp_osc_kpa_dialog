@@ -142,7 +142,7 @@ class RunMaesWidget(QtWidgets.QDialog):
     @qasync.asyncSlot()
     async def mpp_forced_launch(self, addr:int, ch):
         tx = 0x51 | (ch<<8)
-        tx_data = self.client._gen_modbus_packet(addr, 0x06, 0x0, 0x0001, tx)
+        tx_data = self.client._gen_modbus_packet(addr, 0x06, 0x0, 0x0001, f"0{ch} 51")
         await self.client.uart.send(data_bytes=tx_data)
 
 
