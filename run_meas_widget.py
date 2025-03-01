@@ -13,6 +13,7 @@ import struct
 ######### Для встраивания в KPA #############
 try:
     from kpa_parser.modbus_frame import crc16
+    from kpa_parser.modbus_frame.packet_types import ModbusFrame
 except ImportError:
     pass
 ######### Для отдельного запуска модуля #############
@@ -62,12 +63,13 @@ class RunMaesWidget(QtWidgets.QDialog):
             pass
         try:
             self.client = args[0]
-            print(self.client)
+
         except:
             pass
         # self.pushButton_autorun.clicked.connect(self.pushButton_autorun_handler)
         self.pushButton_run_trig_pips.clicked.connect(self.pushButton_run_trig_pips_handler)
         self.pushButton_forced_meas.clicked.connect(self.pushButton_forced_meas_handler)
+        self.client.module_driver.uart1.received.subscribe(self.get_mpp_osc_data)
         # self.checkBox_enable_test_csa.clicked.connect(self.checkBox_enable_test_csa_handler)
 
     # def pushButton_autorun_handler(self) -> None:
@@ -80,20 +82,24 @@ class RunMaesWidget(QtWidgets.QDialog):
     # def checkBox_enable_test_csa_handler(self, state) -> None:
     #     print(state)
 
-    def pushButton_forced_meas_handler(self):
+    @qasync.asyncSlot()
+    async def pushButton_forced_meas_handler(self):
         try:
-            self.pushButton_run_trig_pips_signal.emit()
-            addr = self.lineEdit_ID.value()
-            cmd_code = 16
+            first_reg = 0xA000
             read_amount = 64
-            first_reg = 0
-            data: bytes = struct.pack('>BBHH', addr, cmd_code, first_reg,
-                                      read_amount)
-            data += struct.pack('>BB' , *crc16.crc16(data))
-            self.client._gen_modbus_packet(addr, cmd_code, read_amount, first_reg, tx_data)
+            await self.cmd_mpp_read_osc(first_reg, read_amount)
+            get_mpp_osc_data()
         except Exception as e:
             print(e)
 
+    async def get_mpp_osc_data(self, data: bytes):
+        frames: list[ModbusFrame] = self.client.modbus_stream.get_modbus_packets(data)
+        print(frames)
+
+    async def cmd_mpp_read_osc(self, first_reg, read_amount):
+        addr = self.lineEdit_ID.text()
+        cmd_code = 16
+        self.client._gen_modbus_packet(addr, cmd_code, read_amount, first_reg, "")
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)

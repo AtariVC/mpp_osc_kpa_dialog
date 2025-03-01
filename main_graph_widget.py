@@ -57,7 +57,7 @@ class MainGraphWidget(QtWidgets.QDialog):
             self.client = args[0]
             run_widget: RunMaesWidget =  RunMaesWidget(self.client)
         except:
-            run_widget: RunMaesWidget =  RunMaesWidget("пусто")
+            run_widget: RunMaesWidget =  RunMaesWidget()
             # self.cm_cmd: ModbusCMCommand = ModbusCMCommand(self.client, self.logger)
             # self.mpp_cmd: ModbusMPPCommand = ModbusMPPCommand(self.client, self.logger)
         # self.mw = ModbusWorker()
