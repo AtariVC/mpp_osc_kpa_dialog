@@ -95,7 +95,7 @@ class RunMaesWidget(QtWidgets.QDialog):
             print(e)
 
     async def get_mpp_osc_data(self, data: bytes):
-        frames: list[ModbusFrame] = self.modbus_stream.get_modbus_packets(data)
+        frames: list[ModbusFrame] = self.modbus_stream.get_modbus_packets.read_regs(data)
         if len(frames) > 0:
             print(frames)
 
