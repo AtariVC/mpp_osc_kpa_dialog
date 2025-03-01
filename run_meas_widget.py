@@ -108,13 +108,12 @@ class RunMaesWidget(QtWidgets.QDialog):
 
     @qasync.asyncSlot()
     async def get_mpp_osc_data(self, data: bytes):
-        pass
-        # frames: list[ModbusFrame] = self.modbus_stream.get_modbus_packets(data)
-        # if len(frames) > 0:
-        #     for frame in frames:
-        #         if frame.device_id == self.id and hasattr(frame, 'data'):
-        #             if len(frame.data) == AMNT_RD_RG*2:
-        #                 print(frame.data.hex(" ").upper())
+        frames: list[ModbusFrame] = self.modbus_stream.get_modbus_packets(data)
+        if len(frames) > 0:
+            for frame in frames:
+                if frame.device_id == self.id and hasattr(frame, 'data'):
+                    if len(frame.data) == AMNT_RD_RG*2:
+                        print(frame.data.hex(" ").upper())
 
     @qasync.asyncSlot()
     async def cmd_mpp_read_osc(self):
