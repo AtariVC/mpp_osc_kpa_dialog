@@ -55,11 +55,11 @@ class MainGraphWidget(QtWidgets.QDialog):
         loadUi(Path(__file__).parent.joinpath('DialogGraphWidget2.ui'), self)
         try:
             self.client = args[0]
+            run_widget: RunMaesWidget =  RunMaesWidget(self.client)
         except:
-            pass
+            run_widget: RunMaesWidget =  RunMaesWidget("пусто")
             # self.cm_cmd: ModbusCMCommand = ModbusCMCommand(self.client, self.logger)
             # self.mpp_cmd: ModbusMPPCommand = ModbusMPPCommand(self.client, self.logger)
-        run_widget: RunMaesWidget =  RunMaesWidget(self)
         # self.mw = ModbusWorker()
         # self.logger = log_init()
         graph_widget: GraphWidget = GraphWidget()
