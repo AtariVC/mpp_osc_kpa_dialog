@@ -8,7 +8,16 @@ import qasync
 # from save_config import ConfigSaver
 from pathlib import Path
 import struct
-from kpa_parser.modbus_frame import crc16
+
+
+######### Для встраивания в KPA #############
+try:
+    from kpa_parser.modbus_frame import crc16
+except ImportError:
+    pass
+######### Для отдельного запуска модуля #############
+
+
 
 ####### импорты из других директорий ######
 # /src
@@ -18,9 +27,9 @@ from kpa_parser.modbus_frame import crc16
 # sys.path.append(str(src_path))
 # sys.path.append(str(modules_path))
 
-# from modbus_worker import ModbusWorker                          # noqa: E402
+# from modbus_worker import ModbusWorker                            # noqa: E402
 # # from parsers import  Parsers                                    # noqa: E402
-# from ddii_command import ModbusCMCommand, ModbusMPPCommand      # noqa: E402
+# from ddii_command import ModbusCMCommand, ModbusMPPCommand        # noqa: E402
 
 
 class RunMaesWidget(QtWidgets.QDialog):
@@ -44,7 +53,7 @@ class RunMaesWidget(QtWidgets.QDialog):
         # self.mw = ModbusWorker()
         # self.parser = Parsers()
         self.task = None
-        self.client = args[0]
+        # self.client = args[0]
         if __name__ != "__main__":
             # self.client = args[0]
             # self.logger = args[1]
@@ -65,17 +74,20 @@ class RunMaesWidget(QtWidgets.QDialog):
 
     # def checkBox_enable_test_csa_handler(self, state) -> None:
     #     print(state)
-    
+
     def pushButton_forced_meas_handler(self):
-        self.pushButton_run_trig_pips_signal.emit()
-        addr = self.lineEdit_ID.value()
-        cmd_code = 16
-        read_amount = 64
-        first_reg = 0
-        data: bytes = struct.pack('>BBHH', addr, cmd_code, first_reg,
-                                  read_amount)
-        data += struct.pack('>BB' , *crc16.crc16(data))
-        self.client._gen_modbus_packet(addr, cmd_code, read_amount, first_reg, tx_data)
+        try:
+            self.pushButton_run_trig_pips_signal.emit()
+            addr = self.lineEdit_ID.value()
+            cmd_code = 16
+            read_amount = 64
+            first_reg = 0
+            data: bytes = struct.pack('>BBHH', addr, cmd_code, first_reg,
+                                      read_amount)
+            data += struct.pack('>BB' , *crc16.crc16(data))
+            self.client._gen_modbus_packet(addr, cmd_code, read_amount, first_reg, tx_data)
+        except Exception as e:
+            print(e)
 
 
 if __name__ == "__main__":

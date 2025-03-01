@@ -17,9 +17,9 @@ class GraphPen():
     Добавляет в layout окно графика и отрисовывет график
     '''
     def __init__(self,
-        layout: QtWidgets.QHBoxLayout | QtWidgets.QVBoxLayout | QtWidgets.QGridLayout,
-        name: str = "default_graph",
-        color: tuple = (255, 120, 10)) -> None:
+                    layout: QtWidgets.QHBoxLayout | QtWidgets.QVBoxLayout | QtWidgets.QGridLayout,
+                    name: str = "default_graph",
+                    color: tuple = (255, 120, 10)) -> None:
         self.plt_widget = pg.PlotWidget()
         layout.addWidget(self.plt_widget)
         self.pen = pg.mkPen(color)

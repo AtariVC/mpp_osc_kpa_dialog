@@ -18,12 +18,12 @@ sys.path.append(str(src_path))
 sys.path.append(str(modules_path))
 
 from modbus_worker import ModbusWorker                            # noqa: E402
-from ddii_command import ModbusCMCommand, ModbusMPPCommand        # noqa: E402
+# from ddii_command import ModbusCMCommand, ModbusMPPCommand        # noqa: E402
 # from parsers import  Parsers                                    # noqa: E402
 # from Main_Serial.main_serial_dialog import SerialConnect        # noqa: E402
-from log_config import log_init, log_s                          # noqa: E402
+from log_config import log_init, log_s                            # noqa: E402
 # from parsers_pack import LineEObj, LineEditPack                 # noqa: E402
-from plot_renderer import GraphPen                                  # noqa: E402
+from plot_renderer import GraphPen                                # noqa: E402
 
 
 
