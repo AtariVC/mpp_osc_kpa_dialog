@@ -110,7 +110,7 @@ class RunMaesWidget(QtWidgets.QDialog):
         frames: list[ModbusFrame] = self.modbus_stream.get_modbus_packets(data)
         if len(frames) > 0:
             for frame in frames:
-                if frame.device_id == int(self.lineEdit_ID.text()):
+                if frame.device_id == self.id:
                     if len(frame.data) == AMNT_RD_RG:
                         print(frame.data.hex(" ").upper())
 
