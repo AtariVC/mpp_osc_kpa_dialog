@@ -129,7 +129,7 @@ class RunMaesWidget(QtWidgets.QDialog):
         await self.mpp_forced_launch(addr, 0)
         while self.forced_meas_process_flag == 1:
             try:
-                tx_data = self.client._gen_modbus_packet(addr, cmd_code, read_amount, first_reg, "")
+                tx_data = self.client._gen_modbus_packet(addr, cmd_code, read_amount, first_reg, b'')
                 await self.client.uart.send(data_bytes=tx_data)
                 if first_reg <= 0xA1FF:
                     first_reg += 64
