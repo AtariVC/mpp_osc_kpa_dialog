@@ -88,7 +88,6 @@ class RunMaesWidget(QtWidgets.QDialog):
             first_reg = 0xA000
             read_amount = 64
             await self.cmd_mpp_read_osc(first_reg, read_amount)
-            get_mpp_osc_data()
         except Exception as e:
             print(e)
 
