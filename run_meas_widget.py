@@ -91,13 +91,14 @@ class RunMaesWidget(QtWidgets.QDialog):
     @qasync.asyncSlot()
     async def pushButton_forced_meas_handler(self):
         if self.forced_meas_process_flag == 0:
+            self.forced_meas_process_flag = 1
             self.pushButton_forced_meas.setText("Остановить")
             self.pushButton_run.setEnabled(False)
             try:
                 await self.cmd_mpp_read_osc()
             except Exception as e:
                 print(e)
-            self.forced_meas_process_flag = 1
+
         else:
             self.pushButton_forced_meas.setText("Принуд. запуск")
             self.client.module_driver.uart1.received.unsubscribe(self.get_mpp_osc_data)
