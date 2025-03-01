@@ -94,9 +94,7 @@ class RunMaesWidget(QtWidgets.QDialog):
             self.pushButton_forced_meas.setText("Остановить")
             self.pushButton_run.setEnabled(False)
             try:
-                first_reg = 0xA000
-                read_amount = 64
-                await self.cmd_mpp_read_osc(first_reg, read_amount)
+                await self.cmd_mpp_read_osc()
             except Exception as e:
                 print(e)
             self.forced_meas_process_flag = 1
@@ -109,17 +107,24 @@ class RunMaesWidget(QtWidgets.QDialog):
     async def get_mpp_osc_data(self, data: bytes):
         frames: list[ModbusFrame] = self.modbus_stream.get_modbus_packets(data)
         if len(frames) > 0:
-            print(frames)
+            print(frames[0].data)
 
     @qasync.asyncSlot()
-    async def cmd_mpp_read_osc(self, first_reg, read_amount):
+    async def cmd_mpp_read_osc(self):
+        first_reg = 0xA000
+        read_amount = 64
         addr = int(self.lineEdit_ID.text())
         cmd_code = 0x03
-        try:
-            tx_data = self.client._gen_modbus_packet(addr, cmd_code, read_amount, first_reg, "")
-            await self.client.uart.send(data_bytes=tx_data)
-        except Exception as err:
-            logger.error(err)
+        while self.forced_meas_process_flag == 1:
+            try:
+                tx_data = self.client._gen_modbus_packet(addr, cmd_code, read_amount, first_reg, "")
+                await self.client.uart.send(data_bytes=tx_data)
+                if first_reg <= 0xA1FF:
+                    first_reg += 64
+                else:
+                    first_reg = 0xA000
+            except Exception as err:
+                logger.error(err)
 
 
 
