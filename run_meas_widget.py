@@ -38,16 +38,16 @@ except ImportError:
 class RunMaesWidget(QtWidgets.QDialog):
     lineEdit_triger_ch1          : QtWidgets.QLineEdit
     lineEdit_triger_ch2          : QtWidgets.QLineEdit
-    pushButton_run_trig_pips     : QtWidgets.QPushButton
-    pushButton_autorun           : QtWidgets.QPushButton
+    # pushButton_run_trig_pips     : QtWidgets.QPushButton
+    pushButton_run               : QtWidgets.QPushButton
     pushButton_forced_meas       : QtWidgets.QPushButton
     checkBox_enable_test_csa     : QtWidgets.QCheckBox
     gridLayout_meas              : QtWidgets.QGridLayout
     lineEdit_ID                  : QtWidgets.QLineEdit
 
 
-    pushButton_autorun_signal           = QtCore.pyqtSignal()
-    pushButton_run_trig_pips_signal     = QtCore.pyqtSignal()
+    # pushButton_autorun_signal           = QtCore.pyqtSignal()
+    # pushButton_run_trig_pips_signal     = QtCore.pyqtSignal()
     # checkBox_enable_test_csa_signal     = QtCore.pyqtSignal()
 
     def __init__(self, *args) -> None:
@@ -57,6 +57,7 @@ class RunMaesWidget(QtWidgets.QDialog):
         # self.parser = Parsers()
         self.modbus_stream: ModbusStreamDecoder = ModbusStreamDecoder()
         self.task = None
+        self.forced_meas_process_flag = 0
         # self.client = args[0]
         if __name__ != "__main__":
             # self.client = args[0]
@@ -70,29 +71,40 @@ class RunMaesWidget(QtWidgets.QDialog):
         except:
             pass
         # self.pushButton_autorun.clicked.connect(self.pushButton_autorun_handler)
-        self.pushButton_run_trig_pips.clicked.connect(self.pushButton_run_trig_pips_handler)
-        self.pushButton_forced_meas.clicked.connect(self.pushButton_forced_meas_handler)
+        self.pushButton_run.clicked.connect(self.pushButton_run_handler)
+        # self.pushButton_forced_meas.clicked.connect(self.pushButton_forced_meas_handler)
         self.client.module_driver.uart1.received.subscribe(self.get_mpp_osc_data)
+
         # self.checkBox_enable_test_csa.clicked.connect(self.checkBox_enable_test_csa_handler)
 
     # def pushButton_autorun_handler(self) -> None:
     #     self.pushButton_autorun_signal.emit()
 
-    def pushButton_run_trig_pips_handler(self) -> None:
-        self.pushButton_run_trig_pips_signal.emit()
+    def pushButton_run_handler(self) -> None:
+        # self.pushButton_run_trig_pips_signal.emit()
         # self.
+        pass
 
     # def checkBox_enable_test_csa_handler(self, state) -> None:
     #     print(state)
 
     @qasync.asyncSlot()
     async def pushButton_forced_meas_handler(self):
-        try:
-            first_reg = 0xA000
-            read_amount = 64
-            await self.cmd_mpp_read_osc(first_reg, read_amount)
-        except Exception as e:
-            print(e)
+        if self.forced_meas_process_flag == 0:
+            self.pushButton_forced_meas.setText("Принуд. запуск")
+            self.pushButton_run.setEnabled(False)
+            try:
+                first_reg = 0xA000
+                read_amount = 64
+                await self.cmd_mpp_read_osc(first_reg, read_amount)
+            except Exception as e:
+                print(e)
+            self.forced_meas_process_flag = 1
+        else:
+            self.client.module_driver.uart1.received.unsubscribe(self.get_mpp_osc_data)
+            self.forced_meas_process_flag = 0
+        self.pushButton_forced_meas.setText("Остановить")
+
 
     async def get_mpp_osc_data(self, data: bytes):
         frames: list[ModbusFrame] = self.modbus_stream.get_modbus_packets.read_regs(data)
