@@ -103,7 +103,7 @@ class RunMaesWidget(QtWidgets.QDialog):
 
     def closeEvent(self, event) -> None:
         try:
-            self.client.unsubscribe(self.get_mpp_osc_data)
+            self.client.module_driver.uart1.received.unsubscribe(self.get_mpp_osc_data)
         except Exception as e:
             logger.warning(e)
 
