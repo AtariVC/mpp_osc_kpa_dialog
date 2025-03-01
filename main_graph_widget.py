@@ -10,13 +10,19 @@ from pymodbus.client import AsyncModbusSerialClient
 import asyncio
 from pathlib import Path
 from typing import Dict
+import sys
 
-from modbus_worker import ModbusWorker                     
-from ddii_command import ModbusCMCommand, ModbusMPPCommand 
-from log_config import log_init
-from tabWidget_maker import init_graph_window, create_tab_widget_items                        
-from graph_widget import GraphWidget    
-from run_meas_widget import RunMaesWidget
+graph_widget_path = Path(__file__).parent
+# Добавляем папку src в sys.path
+sys.path.append(str(graph_widget_path))
+
+from kpa_async_pyqt_client.internal_bus.graph_widget.modbus_worker import ModbusWorker                     
+from kpa_async_pyqt_client.internal_bus.graph_widget.log_config import log_init
+from kpa_async_pyqt_client.internal_bus.graph_widget.tabWidget_maker import init_graph_window, create_tab_widget_items                        
+from kpa_async_pyqt_client.internal_bus.graph_widget.graph_widget import GraphWidget    
+from kpa_async_pyqt_client.internal_bus.graph_widget.run_meas_widget import RunMaesWidget
+# from kpa_async_pyqt_client.internal_bus.backend import Internal_Bus_Backend
+
 
 
 class MainGraphWidget(QtWidgets.QDialog):
@@ -36,21 +42,25 @@ class MainGraphWidget(QtWidgets.QDialog):
     #CM_DBG_GET_VOLTAGE = 0x0009
     #CMD_HVIP_ON_OFF = 0x000B
 
-    def __init__(self, logger, *args) -> None:
+    def __init__(self, *args) -> None:
         super().__init__()
         loadUi(Path(__file__).parent.joinpath('DialogGraphWidget2.ui'), self)
-        self.mw = ModbusWorker()
-        self.logger = logger
-        self.flg_get_rst = 0
         if __name__ == "__main__":
-            # self.w_ser_dialog: SerialConnect = args[0]
-            # self.resize(self.w_ser_dialog.size())
-            # self.w_ser_dialog.coroutine_finished.connect(self.get_client)
             pass
         else:
-            self.client: AsyncModbusSerialClient = args[0]
-            self.cm_cmd: ModbusCMCommand = ModbusCMCommand(self.client, self.logger)
-            self.mpp_cmd: ModbusMPPCommand = ModbusMPPCommand(self.client, self.logger)
+            pass
+        self.client = args[0]
+            # self.cm_cmd: ModbusCMCommand = ModbusCMCommand(self.client, self.logger)
+            # self.mpp_cmd: ModbusMPPCommand = ModbusMPPCommand(self.client, self.logger)
+        run_widget: RunMaesWidget =  RunMaesWidget(self.client) 
+        self.mw = ModbusWorker()
+        self.logger = log_init()
+        graph_widget: GraphWidget = GraphWidget()
+        osc_widgets =  {"Измерение": run_widget}
+        widget_model: Dict[str, Dict[str, QWidget]] = {"Осциллограмма": osc_widgets}
+        init_graph_window(self.mainGridLayout, graph_widget, widget_model)
+        self.flg_get_rst = 0
+            
         self.task = None # type: ignore
         # self.pushButton_OK.clicked.connect(self.pushButton_OK_handler)
         # self.coroutine_get_temp_finished.connect(self.creator_task)
@@ -76,11 +86,10 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     qtmodern.styles.dark(app)
     # light(app)
-    logger = log_init()
+    
+    w: MainGraphWidget = MainGraphWidget()
     graph_widget: GraphWidget = GraphWidget()
-    w: MainGraphWidget = MainGraphWidget(logger)
     run_widget: RunMaesWidget =  RunMaesWidget()
-    run_widget2: RunMaesWidget =  RunMaesWidget()
     osc_widgets =  {"Измерение": run_widget}
     widget_model: Dict[str, Dict[str, QWidget]] = {"Осциллограмма": osc_widgets}
     init_graph_window(w.mainGridLayout, graph_widget, widget_model)
