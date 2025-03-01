@@ -73,7 +73,7 @@ class RunMaesWidget(QtWidgets.QDialog):
             pass
         # self.pushButton_autorun.clicked.connect(self.pushButton_autorun_handler)
         self.pushButton_run.clicked.connect(self.pushButton_run_handler)
-        # self.pushButton_forced_meas.clicked.connect(self.pushButton_forced_meas_handler)
+        self.pushButton_forced_meas.clicked.connect(self.pushButton_forced_meas_handler)
 
         # self.checkBox_enable_test_csa.clicked.connect(self.checkBox_enable_test_csa_handler)
 
@@ -91,7 +91,7 @@ class RunMaesWidget(QtWidgets.QDialog):
     @qasync.asyncSlot()
     async def pushButton_forced_meas_handler(self):
         if self.forced_meas_process_flag == 0:
-            self.pushButton_forced_meas.setText("Принуд. запуск")
+            self.pushButton_forced_meas.setText("Остановить")
             self.pushButton_run.setEnabled(False)
             try:
                 first_reg = 0xA000
@@ -101,9 +101,9 @@ class RunMaesWidget(QtWidgets.QDialog):
                 print(e)
             self.forced_meas_process_flag = 1
         else:
+            self.pushButton_forced_meas.setText("Принуд. запуск")
             self.client.module_driver.uart1.received.unsubscribe(self.get_mpp_osc_data)
             self.forced_meas_process_flag = 0
-        self.pushButton_forced_meas.setText("Остановить")
 
 
     async def get_mpp_osc_data(self, data: bytes):
@@ -113,7 +113,7 @@ class RunMaesWidget(QtWidgets.QDialog):
 
     async def cmd_mpp_read_osc(self, first_reg, read_amount):
         addr = int(self.lineEdit_ID.text())
-        cmd_code = 16
+        cmd_code = 0x03
         self.client._gen_modbus_packet(addr, cmd_code, read_amount, first_reg, "")
 
 
