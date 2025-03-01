@@ -20,7 +20,8 @@ except ImportError:
     pass
 ######### Для отдельного запуска модуля #############
 
-
+# define
+AMNT_RD_RG = 64
 
 ####### импорты из других директорий ######
 # /src
@@ -44,7 +45,6 @@ class RunMaesWidget(QtWidgets.QDialog):
     checkBox_enable_test_csa     : QtWidgets.QCheckBox
     gridLayout_meas              : QtWidgets.QGridLayout
     lineEdit_ID                  : QtWidgets.QLineEdit
-
 
     # pushButton_autorun_signal           = QtCore.pyqtSignal()
     # pushButton_run_trig_pips_signal     = QtCore.pyqtSignal()
@@ -108,12 +108,15 @@ class RunMaesWidget(QtWidgets.QDialog):
     async def get_mpp_osc_data(self, data: bytes):
         frames: list[ModbusFrame] = self.modbus_stream.get_modbus_packets(data)
         if len(frames) > 0:
-            print(frames[0].data.hex(" ").upper())
+            for frame in frames:
+                if frame.device_id == int(self.lineEdit_ID.text()):
+                    if len(frame.data) == AMNT_RD_RG:
+                        print(frame.data.hex(" ").upper())
 
     @qasync.asyncSlot()
     async def cmd_mpp_read_osc(self):
         first_reg = 0xA000
-        read_amount = 64
+        read_amount = AMNT_RD_RG
         addr = int(self.lineEdit_ID.text())
         cmd_code = 0x03
         while self.forced_meas_process_flag == 1:
