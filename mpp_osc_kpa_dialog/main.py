@@ -18,21 +18,12 @@ graph_widget_path = Path(__file__).parent
 sys.path.append(str(graph_widget_path))
 
 ######### Для встраивания в KPA #############
-try:
-    # from kpa_async_pyqt_client.internal_bus.graph_widget.modbus_worker import ModbusWorker
-    # from kpa_async_pyqt_client.internal_bus.graph_widget.log_config import log_init
-    from kpa_async_pyqt_client.internal_bus.graph_widget.tabWidget_maker import init_graph_window, create_tab_widget_items
-    from kpa_async_pyqt_client.internal_bus.graph_widget.graph_widget import GraphWidget
-    from kpa_async_pyqt_client.internal_bus.graph_widget.run_meas_widget import RunMaesWidget
-except ImportError:
-######### Для отладочного запуска через __main__ #############
-    # from modbus_worker import ModbusWorker
-    # from ddii_command import ModbusCMCommand, ModbusMPPCommand
-    # from log_config import log_init
-    from util.tabwidget_maker import init_graph_window, create_tab_widget_items
-    from modules.graph_widget import GraphWidget
-    from modules.run_meas_widget import RunMaesWidget
+from mpp_osc_kpa_dialog.util.main_window_maker import clear_left_widget, create_split_widget, create_tab_widget_items
+from mpp_osc_kpa_dialog.modules.graph_widget import GraphWidget
+from mpp_osc_kpa_dialog.modules.run_meas_widget import RunMaesWidget
+from mpp_osc_kpa_dialog.modules.measure_widget import MeasureWidget
 
+# verticalLayout_3
 
 class MainGraphWidget(QtWidgets.QDialog):
     mainGridLayout                      : QtWidgets.QGridLayout
@@ -42,6 +33,7 @@ class MainGraphWidget(QtWidgets.QDialog):
     def __init__(self, *args) -> None:
         super().__init__()
         loadUi(Path(__file__).parent.joinpath('main.ui'), self)
+        self.init_widgets()
         try:
             self.client = args[0]
             self.run_widget: RunMaesWidget =  RunMaesWidget(self.client)
@@ -55,6 +47,19 @@ class MainGraphWidget(QtWidgets.QDialog):
 
         self.task = None # type: ignore
 
+    def init_widgets(self) -> None:
+        # Виджеты
+        self.run_widget: RunMaesWidget =  RunMaesWidget()
+        
+
+    def widget_model(self):
+        spacer_v = QSpacerItem(0, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        return {
+            "Осциллограф": {
+                "Меню запуска": self.run_widget,
+                "Измерение": self.measure_widget,
+            }
+        }
 
 
 
