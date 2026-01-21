@@ -18,10 +18,6 @@ dependencies = [
     "qtpy>=2.4.3",
 ]
 
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["mpp-osc-kpa-dialog*"]
-
 [tool.setuptools.package-data]
 "*" = ["*.ui", "*.svg", "*.ico", "*.png", "*.qss"]
 
