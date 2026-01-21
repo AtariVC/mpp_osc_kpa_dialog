@@ -2,7 +2,11 @@ from typing import Dict
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QGroupBox, QSpacerItem, QSizePolicy, QSplitter, QTabWidget, QScrollArea, QGridLayout
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QFont
-from graph_widget import GraphWidget   
+import sys
+from pathlib import Path
+graph_widget_path = Path(__file__).parent.parent
+sys.path.append(str(graph_widget_path))
+from modules.graph_widget import GraphWidget   
 
 def init_graph_window(gridLayout_main_split: QGridLayout, w_graph_widget: GraphWidget,\
                         widget_model: Dict[str, Dict[str, QWidget]]) -> None:
