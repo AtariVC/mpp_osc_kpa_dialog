@@ -9,29 +9,10 @@ import qasync
 from pathlib import Path
 from dataclasses import dataclass
 
-####### импорты из других директорий ######
-# /src
-src_path = Path(__file__).resolve().parent.parent.parent.parent
-modules_path = Path(__file__).resolve().parent.parent.parent
-# Добавляем папку src в sys.path
-sys.path.append(str(src_path))
-sys.path.append(str(modules_path))
-
 try:
-    # from kpa_async_pyqt_client.internal_bus.graph_widget.plot_renderer import GraphPen
-    pass
-
-except ImportError:
-    from modbus_worker import ModbusWorker                            # noqa: E402
-    # from ddii_command import ModbusCMCommand, ModbusMPPCommand        # noqa: E402
-    # from parsers import  Parsers                                    # noqa: E402
-    # from Main_Serial.main_serial_dialog import SerialConnect        # noqa: E402
-    from log_config import log_init, log_s                            # noqa: E402
-    # from parsers_pack import LineEObj, LineEditPack                 # noqa: E402
-    from plot_renderer import GraphPen                                # noqa: E402
-
-
-
+    from mpp_osc_kpa_dialog.util.plot_renderer import GraphPen
+except:
+    from util.plot_renderer import GraphPen
 
 
 class GraphWidget(QtWidgets.QWidget):
@@ -46,20 +27,14 @@ class GraphWidget(QtWidgets.QWidget):
     def __init__(self) -> None:
         super().__init__()
         loadUi(Path(__file__).parent.joinpath('graph_widget.ui'), self)
-        # self.mw = ModbusWorker()
-        # self.parser = Parsers()
-        # self.task = None # type: ignore
+        self.task = None # type: ignore
 
-        # self.gp_pips = GraphPen(self.vLayout_pips, name = "ch1", color = (255, 255, 0))
-        # self.gp_sipm = GraphPen(self.vLayout_sipm, name = "ch2", color = (0, 255, 255))
-
-        # self.hp_pips = HistPen(self.vLayout_hist_pips, name = "h_pips", color = (0, 0, 255, 150))
-        # self.hp_sipm = HistPen(self.vLayout_hist_sipm, name = "h_sipm", color = (255, 0, 0, 150))
+        self.gp_ch1 = GraphPen(self.vLayout_pips, name = "ch1", color = (255, 255, 0))
+        self.gp_ch2 = GraphPen(self.vLayout_sipm, name = "ch2", color = (0, 255, 255))
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     qtmodern.styles.dark(app)
-    # light(app)
     w: GraphWidget = GraphWidget()
     event_loop = qasync.QEventLoop(app)
     asyncio.set_event_loop(event_loop)

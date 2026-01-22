@@ -144,6 +144,9 @@
        <property name="readOnly">
         <bool>false</bool>
        </property>
+       <property name="clearButtonEnabled">
+        <bool>false</bool>
+       </property>
       </widget>
      </item>
      <item row="3" column="4">
@@ -160,7 +163,7 @@
       </spacer>
      </item>
      <item row="2" column="2">
-      <widget class="QLineEdit" name="lineEdit_triger_ch_2">
+      <widget class="QLineEdit" name="lineEdit_triger_ch2">
        <property name="minimumSize">
         <size>
          <width>115</width>
@@ -219,6 +222,9 @@
        <property name="text">
         <string>Тригер ch1:</string>
        </property>
+       <property name="checked">
+        <bool>false</bool>
+       </property>
       </widget>
      </item>
      <item row="2" column="1">
@@ -228,6 +234,9 @@
        </property>
        <property name="text">
         <string>Тригер ch2:</string>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
        </property>
       </widget>
      </item>

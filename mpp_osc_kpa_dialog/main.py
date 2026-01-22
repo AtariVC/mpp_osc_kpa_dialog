@@ -27,11 +27,13 @@ try:
     from mpp_osc_kpa_dialog.modules.graph_widget import GraphWidget
     from mpp_osc_kpa_dialog.modules.run_meas_widget import RunMaesWidget
     from mpp_osc_kpa_dialog.modules.measure_widget import MeasureWidget
+    from mpp_osc_kpa_dialog import __version__
 except:
     from util.main_window_maker import create_split_widget, create_tab_widget_items
     from modules.graph_widget import GraphWidget
     from modules.run_meas_widget import RunMaesWidget
     from modules.measure_widget import MeasureWidget
+    # from mpp_osc_kpa_dialog import __version__
 
 # verticalLayout_3
 
@@ -42,7 +44,8 @@ class MPP_Osc_Dialog(Module_Backend):
 
     def __init__(self, parent, **kwargs) -> None:
         self.module_driver: Internal_Bus_Driver = Internal_Bus_Driver(**kwargs)
-        super().__init__(self.module_driver.label,
+        self.label = 'mpp diagrammer'
+        super().__init__(self.label,
                          path=Path(__file__).parent.joinpath('main.ui'),
                          **kwargs)
         # loadUi(Path(__file__).parent.joinpath('main.ui'), self)
