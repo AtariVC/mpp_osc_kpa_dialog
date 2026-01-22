@@ -60,11 +60,6 @@ class RunMaesWidget(QtWidgets.QDialog):
         loadUi(Path(__file__).parent.joinpath('run_meas_widget_bdk2.ui'), self) 
         self.parent = args[0]
         self.logger = logger
-        try:
-            self.kpa_gui_model: KPA_BDK2_GUI_Model = KPA_BDK2_GUI_Model() # type:ignore
-            self.client = self.kpa_gui_model.internal_bus_module
-        except Exception as e:
-            self.logger.error(e)
         # self.mw = ModbusWorker()
         # self.parser = Parsers()
         try:
