@@ -60,7 +60,6 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     qtmodern.styles.dark(app)
     # light(app)
-    logger = log_init()
     w: GraphWidget = GraphWidget()
     event_loop = qasync.QEventLoop(app)
     asyncio.set_event_loop(event_loop)

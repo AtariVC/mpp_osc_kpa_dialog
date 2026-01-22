@@ -25,7 +25,7 @@ def create_split_widget(gridLayout_main_split: QGridLayout,
     splitter.addWidget(left_widget)
     splitter.addWidget(right_widget)
 
-def clear_left_widget(old_left_widget: QWidget, new_left_widget: QWidget):
+def replace_left_widget_splitter(old_left_widget: QWidget, new_left_widget: QWidget):
         """Заменяет левый виджет в сплиттере"""
     # 1. Находим сплиттер (родительский виджет)
         splitter = old_left_widget.parentWidget()

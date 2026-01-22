@@ -13,11 +13,12 @@ from loguru import logger
 
 ######### Для встраивания в KPA #############
 try:
-    from kpa_parser.modbus_frame import crc16
-    from kpa_parser.modbus_frame.packet_types import ModbusFrame
-    from kpa_parser.modbus_frame.stream_decoder import ModbusStreamDecoder
-    from kpa_async_pyqt_client.internal_bus.graph_widget.plot_renderer import GraphPen
-    from kpa_async_pyqt_client.internal_bus.graph_widget.graph_widget import GraphWidget
+    from kpa_async_bdk2m_pyqt.modules.kpa_gui_model import KPA_BDK2_GUI_Model
+    # from kpa_parser.modbus_frame import crc16
+    # from kpa_parser.modbus_frame.packet_types import ModbusFrame
+    # from kpa_parser.modbus_frame.stream_decoder import ModbusStreamDecoder
+    # from kpa_async_pyqt_client.internal_bus.graph_widget.plot_renderer import GraphPen
+    # from kpa_async_pyqt_client.internal_bus.graph_widget.graph_widget import GraphWidget
 except ImportError:
     pass
 ######### Для отдельного запуска модуля #############
@@ -43,10 +44,12 @@ class RunMaesWidget(QtWidgets.QDialog):
     lineEdit_triger_ch2          : QtWidgets.QLineEdit
     # pushButton_run_trig_pips     : QtWidgets.QPushButton
     pushButton_run               : QtWidgets.QPushButton
-    pushButton_forced_meas       : QtWidgets.QPushButton
-    checkBox_enable_test_csa     : QtWidgets.QCheckBox
+    checkBox_trig1               : QtWidgets.QCheckBox
+    checkBox_trig2               : QtWidgets.QCheckBox
     gridLayout_meas              : QtWidgets.QGridLayout
-    lineEdit_ID                  : QtWidgets.QLineEdit
+
+    # lineEdit_ID                  : QtWidgets.QLineEdit # for run_meas_widget_comm.ui
+    # comboBox_module_mpp          : QtWidgets.QComboBox  # run_meas_widget_bdk2.ui
 
     # pushButton_autorun_signal           = QtCore.pyqtSignal()
     # pushButton_run_trig_pips_signal     = QtCore.pyqtSignal()
@@ -54,34 +57,43 @@ class RunMaesWidget(QtWidgets.QDialog):
 
     def __init__(self, *args) -> None:
         super().__init__()
-        loadUi(Path(__file__).parent.joinpath('WidgetRunMeasure.ui'), self)
+        loadUi(Path(__file__).parent.joinpath('run_meas_widget_bdk2.ui'), self)
+        self.parent = args[0]
+        self.logger = logger
+        try:
+            self.kpa_gui_model: KPA_BDK2_GUI_Model = KPA_BDK2_GUI_Model() # type:ignore
+            self.client = self.kpa_gui_model.internal_bus_module
+        except Exception as e:
+            self.logger.error(e)
         # self.mw = ModbusWorker()
         # self.parser = Parsers()
-        self.grph_wdgt = GraphWidget()
-        self.task = None
-        self.forced_meas_process_flag = 0
-        self.id = int(self.lineEdit_ID.text())
-        self.pushButton_run.setEnabled(False)
+        try:
+            self.lineEdit_ID : QtWidgets.QLineEdit # for run_meas_widget_comm.ui
+            self.id = int(self.lineEdit_ID.text())
+        except Exception:
+            self.comboBox_module_mpp : QtWidgets.QComboBox  # for run_meas_widget_bdk2.ui
+            modules_mpp = {'МПП-1': 4, 'МПП-2': 5, 'МПП-3': 6, 'МПП-4': 7,'МПП-5': 8, 'МПП-6': 9, 'МПП-7': 3}
+            self.comboBox_module_mpp.addItems(modules_mpp.keys())
         # self.client = args[0]
-        if __name__ != "__main__":
+        # if __name__ != "__main__":
             # self.client = args[0]
             # self.logger = args[1]
             # self.cm_cmd: ModbusCMCommand = ModbusCMCommand(self.client, self.logger)
             # self.mpp_cmd: ModbusMPPCommand = ModbusMPPCommand(self.client, self.logger)
-            pass
-        try:
-            self.client = args[0]
-            self.modbus_stream: ModbusStreamDecoder = ModbusStreamDecoder()
-            self.client.module_driver.uart1.received.subscribe(self.get_mpp_osc_data)
-        except:
-            pass
+        #     pass
+        # try:
+            # self.client = args[0]
+            # self.modbus_stream: ModbusStreamDecoder = ModbusStreamDecoder()
+            # self.client.module_driver.uart1.received.subscribe(self.get_mpp_osc_data)
+        # except:
+        #     pass
         # self.pushButton_autorun.clicked.connect(self.pushButton_autorun_handler)
-        self.gp_ch1 = GraphPen(self.grph_wdgt.vLayout_pips, name = "ch1", color = (255, 255, 0))
-        self.gp_ch2 = GraphPen(self.grph_wdgt.vLayout_sipm, name = "ch2", color = (0, 255, 255))
-        self.ch1_data: list[int] = []
-        self.ch2_data: list[int] = []
+        # self.gp_ch1 = GraphPen(self.grph_wdgt.vLayout_pips, name = "ch1", color = (255, 255, 0))
+        # self.gp_ch2 = GraphPen(self.grph_wdgt.vLayout_sipm, name = "ch2", color = (0, 255, 255))
+        # self.ch1_data: list[int] = []
+        # self.ch2_data: list[int] = []
+        self.run_mes_flag = 0
         self.pushButton_run.clicked.connect(self.pushButton_run_handler)
-        self.pushButton_forced_meas.clicked.connect(self.pushButton_forced_meas_handler)
 
 
         # self.checkBox_enable_test_csa.clicked.connect(self.checkBox_enable_test_csa_handler)
@@ -94,24 +106,23 @@ class RunMaesWidget(QtWidgets.QDialog):
         # self.
         pass
 
-    # def checkBox_enable_test_csa_handler(self, state) -> None:
-    #     print(state)
 
     @qasync.asyncSlot()
     async def pushButton_forced_meas_handler(self):
-        if self.forced_meas_process_flag == 0:
-            self.forced_meas_process_flag = 1
-            self.pushButton_forced_meas.setText("Остановить")
+        if self.run_mes_flag == 0:
+            self.run_mes_flag = 1
+            self.pushButton_run_source_text: str = self.pushButton_run.text()
+            self.pushButton_run.setText("Остановить")
             # self.pushButton_run.setEnabled(False)
             try:
                 await self.cmd_mpp_read_osc()
             except Exception as e:
                 print(e)
-
         else:
-            self.pushButton_forced_meas.setText("Принуд. запуск")
+            self.pushButton_run.setText(self.pushButton_run_source_text)
             self.client.module_driver.uart1.received.unsubscribe(self.get_mpp_osc_data)
             self.forced_meas_process_flag = 0
+        # TODO: создать задачу измерения 
 
     @qasync.asyncSlot()
     async def get_mpp_osc_data(self, data: bytes):
