@@ -7,6 +7,7 @@ requires-python = ">=3.11"
 dependencies = [
     "asyncio>=4.0.0",
     "crcmod>=1.7",
+    "kpa-async-pyqt-client",
     "loguru>=0.7.3",
     "numpy>=2.4.1",
     "pandas>=2.3.3",
@@ -14,10 +15,15 @@ dependencies = [
     "pyqt6>=6.10.2",
     "pyqtgraph>=0.14.0",
     "qasync>=0.28.0",
+    "qmodernwindow",
     "qtmodern>=0.2.0",
     "qtpy>=2.4.3",
 ]
 
 [tool.setuptools.package-data]
 "*" = ["*.ui", "*.svg", "*.ico", "*.png", "*.qss"]
+
+[tool.uv.sources]
+kpa-async-pyqt-client = { git = "https://github.com/OAI-NSU/KPA_Async_PyQt_Client.git" }
+
 

@@ -12,6 +12,10 @@ from pathlib import Path
 from typing import Dict
 import sys
 from loguru import logger
+from kpa_config.config import ModulesNames
+from kpa_async_pyqt_client.Base_Module_Backend import Module_Backend
+from kpa_async_driver.modules.internal_bus_driver import Internal_Bus_Driver
+from kpa_async_pyqt_client.impact.backend import Impact_Backend
 
 graph_widget_path = Path(__file__).parent
 # Добавляем папку src в sys.path
@@ -31,15 +35,29 @@ except:
 
 # verticalLayout_3
 
-class MainGraphWidget(QtWidgets.QDialog):
+class MPP_Osc_Dialog(Module_Backend):
     mainGridLayout : QtWidgets.QGridLayout
 
     coroutine_get_temp_finished = QtCore.pyqtSignal()
 
-    def __init__(self, *args) -> None:
-        super().__init__()
-        loadUi(Path(__file__).parent.joinpath('main.ui'), self)
+    def __init__(self, parent, **kwargs) -> None:
+        self.module_driver: Internal_Bus_Driver = Internal_Bus_Driver(**kwargs)
+        super().__init__(self.module_driver.label,
+                         path=Path(__file__).parent.joinpath('main.ui'),
+                         **kwargs)
+        # loadUi(Path(__file__).parent.joinpath('main.ui'), self)
+        # add button on kpa_async_pyqt_client.impact
+        # try:
+        #     self.parent = parent
+        #     self.impact_module: Impact_Backend = parent.impact_module # type.ignore
+        #     self.pushButton_osc: QtWidgets.QPushButton = QtWidgets.QPushButton()
+        #     self.pushButton_osc.setText('Осциллограммы')
+        #     self.impact_module.verticalLayout_3.addWidget(self.pushButton_osc)
+        #     self.pushButton_osc.clicked.connect(self.pushButton_osc_handler)
+        # except Exception as e:
+        #     logger.error(e)
         self.init_widgets()
+
 
     def init_widgets(self) -> None:
         # Виджеты
@@ -58,19 +76,23 @@ class MainGraphWidget(QtWidgets.QDialog):
                 "Измерение": self.measure_widget,
             }
         }
+    
 
 
+# async def connect(module: MPP_Osc_Dialog):
+#     await module.connect_module()
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
-    qtmodern.styles.dark(app)
-
-    w: MainGraphWidget = MainGraphWidget()
     event_loop = qasync.QEventLoop(app)
     asyncio.set_event_loop(event_loop)
+    qtmodern.styles.dark(app)
     app_close_event = asyncio.Event()
     app.aboutToQuit.connect(app_close_event.set)
-    w.show()
+    parent = None
+    module: MPP_Osc_Dialog = MPP_Osc_Dialog(parent, show_connection_status=True)
+    # asyncio.run(connect)
+    module.show()
 
     with event_loop:
         try:

@@ -12,15 +12,15 @@ from loguru import logger
 
 
 ######### Для встраивания в KPA #############
-try:
-    from kpa_async_bdk2m_pyqt.modules.kpa_gui_model import KPA_BDK2_GUI_Model
-    # from kpa_parser.modbus_frame import crc16
-    # from kpa_parser.modbus_frame.packet_types import ModbusFrame
-    # from kpa_parser.modbus_frame.stream_decoder import ModbusStreamDecoder
-    # from kpa_async_pyqt_client.internal_bus.graph_widget.plot_renderer import GraphPen
-    # from kpa_async_pyqt_client.internal_bus.graph_widget.graph_widget import GraphWidget
-except ImportError:
-    pass
+# try:
+#     from kpa_async_bdk2m_pyqt.kpa_gui_model import KPA_BDK2_GUI_Model
+#     # from kpa_parser.modbus_frame import crc16
+#     # from kpa_parser.modbus_frame.packet_types import ModbusFrame
+#     # from kpa_parser.modbus_frame.stream_decoder import ModbusStreamDecoder
+#     # from kpa_async_pyqt_client.internal_bus.graph_widget.plot_renderer import GraphPen
+#     # from kpa_async_pyqt_client.internal_bus.graph_widget.graph_widget import GraphWidget
+# except ImportError:
+#     pass
 ######### Для отдельного запуска модуля #############
 
 # define
@@ -49,7 +49,7 @@ class RunMaesWidget(QtWidgets.QDialog):
     gridLayout_meas              : QtWidgets.QGridLayout
 
     # lineEdit_ID                  : QtWidgets.QLineEdit # for run_meas_widget_comm.ui
-    # comboBox_module_mpp          : QtWidgets.QComboBox  # run_meas_widget_bdk2.ui
+    # comboBox_module_mpp          : QtWidgets.QComboBox  # for run_meas_widget_bdk2.ui
 
     # pushButton_autorun_signal           = QtCore.pyqtSignal()
     # pushButton_run_trig_pips_signal     = QtCore.pyqtSignal()
@@ -57,7 +57,7 @@ class RunMaesWidget(QtWidgets.QDialog):
 
     def __init__(self, *args) -> None:
         super().__init__()
-        loadUi(Path(__file__).parent.joinpath('run_meas_widget_bdk2.ui'), self)
+        loadUi(Path(__file__).parent.joinpath('run_meas_widget_bdk2.ui'), self) 
         self.parent = args[0]
         self.logger = logger
         try:
