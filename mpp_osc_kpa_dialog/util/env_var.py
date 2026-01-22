@@ -21,6 +21,7 @@ class EnvironmentVar():
 
     MPP_START_MEASURE: list[int]    = [0x0002, 0x0001]
     MPP_STOP_MEASURE: list[int]     = [0x0002, 0x0000]
+    
     MPP_START_MEASURE_FORCED        = 0x0051
 
 

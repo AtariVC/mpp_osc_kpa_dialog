@@ -13,51 +13,17 @@ from kpa_async_driver.module_driver import Module_Driver
 from util.command_interface import ModbusMPPCommand
 from kpa_async_driver.modbus_stream.stream_decoder import ModbusStreamDecoder
 from functools import partial
-
-
-######### Для встраивания в KPA #############
-# try:
-#     from kpa_async_bdk2m_pyqt.kpa_gui_model import KPA_BDK2_GUI_Model
-#     # from kpa_parser.modbus_frame import crc16
-#     # from kpa_parser.modbus_frame.packet_types import ModbusFrame
-#     # from kpa_parser.modbus_frame.stream_decoder import ModbusStreamDecoder
-#     # from kpa_async_pyqt_client.internal_bus.graph_widget.plot_renderer import GraphPen
-#     # from kpa_async_pyqt_client.internal_bus.graph_widget.graph_widget import GraphWidget
-# except ImportError:
-#     pass
-######### Для отдельного запуска модуля #############
-
-# define
-AMNT_RD_RG = 64
-
-####### импорты из других директорий ######
-# /src
-# src_path = Path(__file__).resolve().parent.parent.parent.parent
-# modules_path = Path(__file__).resolve().parent.parent.parent
-# # Добавляем папку src в sys.path
-# sys.path.append(str(src_path))
-# sys.path.append(str(modules_path))
-
-# from modbus_worker import ModbusWorker                            # noqa: E402
-# # from parsers import  Parsers                                    # noqa: E402
-# from ddii_command import ModbusCMCommand, ModbusMPPCommand        # noqa: E402
+from typing import Awaitable, Callable
 
 
 class RunMaesWidget(QtWidgets.QWidget):
     lineEdit_triger_ch1          : QtWidgets.QLineEdit
     lineEdit_triger_ch2          : QtWidgets.QLineEdit
-    # pushButton_run_trig_pips     : QtWidgets.QPushButton
+
     pushButton_run               : QtWidgets.QPushButton
     checkBox_trig1               : QtWidgets.QCheckBox
     checkBox_trig2               : QtWidgets.QCheckBox
     gridLayout_meas              : QtWidgets.QGridLayout
-
-    # lineEdit_ID                  : QtWidgets.QLineEdit # for run_meas_widget_comm.ui
-    # comboBox_module_mpp          : QtWidgets.QComboBox  # for run_meas_widget_bdk2.ui
-
-    # pushButton_autorun_signal           = QtCore.pyqtSignal()
-    # pushButton_run_trig_pips_signal     = QtCore.pyqtSignal()
-    # checkBox_enable_test_csa_signal     = QtCore.pyqtSignal()
 
     def __init__(self, parent) -> None:
         super().__init__()
@@ -126,14 +92,14 @@ class RunMaesWidget(QtWidgets.QWidget):
 
     async def asyncio_ACQ_loop_request(self) -> None:
         try:
-            lvl = int(self.lineEdit_trigger.text())
-            save: bool = False
-            if not self.w_ser_dialog.is_modbus_ready():
-                await self._stop_measuring("Потеряно соединение")
-                return
-            if self.flags[self.enable_trig_meas_flag]:
-                await self.mpp_cmd.set_level(lvl)
+            lvl2 = int(self.lineEdit_triger_ch2.text())
+            if self.flags[self.trig1_flag]:
+                lvl1 = int(self.lineEdit_triger_ch1.text())
+                await self.mpp_cmd.set_level(ch=0, lvl=lvl1)
                 await self.mpp_cmd.start_measure(on=1)
+            elif not self.flags[self.trig1_flag] and not self.flags[self.trig2_flag]:
+                await self.mpp_cmd.start_forced(ch=0, on=1)
+            elif self.flags[self.trig1_flag]:
             self.graph_widget.show()
             while 1:
 
@@ -154,6 +120,8 @@ if __name__ == "__main__":
             event_loop.run_until_complete(app_close_event.wait())
         except asyncio.CancelledError:
             ...
+
+
 
 
 
