@@ -83,6 +83,7 @@ class RunMaesWidget(QtWidgets.QWidget):
         self.init_flags()
         # ====================================================== #
         self.pushButton_run_trig.clicked.connect(self.pushButton_run_trig_handler)
+        self.comboBox_module_mpp.editTextChanged
 
     def init_flags(self):
         for checkBox, flag in self.checkbox_flag_mapping.items():
@@ -103,16 +104,22 @@ class RunMaesWidget(QtWidgets.QWidget):
 
     @qasync.asyncSlot()
     async def pushButton_run_trig_handler(self) -> None:
-        self.start_meas_flag = not self.start_meas_flag
-        text_button: str = self.pushButton_run_trig.text()
+        await self.pushButton_run_trig_flag_updater()
         if self.start_meas_flag:
             self.start_async_task_loop_request()
+        else:
+            self.task_manager.cancel_task("ACQ_task")
+        
+    async def pushButton_run_trig_flag_updater(self):
+        self.start_meas_flag = not self.start_meas_flag
+        if self.start_meas_flag:
+            self.text_button_trig: str = self.pushButton_run_trig.text()
             self.pushButton_run_trig.setText("Остановить изм.")
         else:
-            self.pushButton_run_trig.setText(text_button)
+            self.pushButton_run_trig.setText(self.text_button_trig)
             await self.mpp_cmd.start_measure(ch=0, state=0)
             await self.mpp_cmd.start_measure(ch=1, state=0)
-            self.task_manager.cancel_task("ACQ_task")
+
 
     def start_async_task_loop_request(self) -> None:
         ACQ_task: Callable[[], Awaitable[None]] = self.asyncio_ACQ_loop_request
@@ -124,11 +131,6 @@ class RunMaesWidget(QtWidgets.QWidget):
         lvl2 = int(self.lineEdit_triger_ch2.text())
 
         if (bool_trg1, bool_trg2) == (True, True):
-            await self.mpp_cmd.set_level(ch=0, lvl=lvl1)
-            await self.mpp_cmd.set_level(ch=1, lvl=lvl2)
-            await self.mpp_cmd.start_measure(ch=0, state=1)
-            await self.mpp_cmd.start_measure(ch=1, state=1)
-        elif (bool_trg1, bool_trg2) == (False, False):
             await self.mpp_cmd.set_level(ch=0, lvl=lvl1)
             await self.mpp_cmd.set_level(ch=1, lvl=lvl2)
             await self.mpp_cmd.start_measure(ch=0, state=1)
@@ -165,6 +167,8 @@ class RunMaesWidget(QtWidgets.QWidget):
                 result_ch1_int: list[int] = await self.parser.mpp_pars_16b(result_ch1)
                 data_ch0, data_ch1 = await self._graph_widget_drawable(result_ch0_int, result_ch1_int)
                 await self._measure_widget_updater(data_ch0[1], data_ch1[1])
+                await self.pushButton_run_trig_flag_updater()
+                break
 
     async def _graph_widget_drawable(self, data_ch0, data_ch1) -> tuple:
         try:
@@ -184,8 +188,8 @@ class RunMaesWidget(QtWidgets.QWidget):
             min: float  = self.fd.filters['min()'](data_ch1)
             pk = self.fd.filters['pk()'](data_ch1)
             self.measure_widget.update_widget_ca_b(max, min, pk)
-        except asyncio.exceptions.CancelledError:
-            return None
+        except Exception as e:
+            logger.error(e)
 
 
 

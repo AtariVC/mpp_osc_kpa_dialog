@@ -3,6 +3,7 @@ from kpa_async_driver.modbus_stream.stream_decoder import ModbusStreamDecoder
 from kpa_async_driver.modbus_stream.packet_types import ModbusFrame
 from loguru import logger
 import struct
+import asyncio
 
 try:
     from mpp_osc_kpa_dialog.util.env_var import EnvironmentVar
@@ -24,7 +25,7 @@ class ModbusMPPCommand(EnvironmentVar):
             cmd = tuple([((ch & 0xFF)<<4 )|(cmd_reg & 0xFF)] + param)
         if param is None: 
             cmd = (((ch & 0xFF)<<4 )|(cmd_reg & 0xFF),)
-        return struct.pack(f'>H{len(cmd)}s', cmd)
+        return struct.pack('>'+'H'*len(cmd), *cmd)
 
     async def read_oscill(self, ch: int = 0) -> bytes:
         try:
@@ -32,8 +33,9 @@ class ModbusMPPCommand(EnvironmentVar):
             for offset in range(0, 512, 64):
                 reg_addr = (self.MPP_REG_OSCILL_CH1 if ch == 1 else self.MPP_REG_OSCILL_CH0) + offset
                 answer: ModbusFrame | None = await self.modbus.read_modbus(self.id, 3, 64, reg_addr)
+                # await asyncio.sleep(0.1)
                 if answer:
-                    all_data.extend(answer.data)
+                    all_data.extend(answer._raw_data)
                 else:
                     logger.error(f'Mpdule with id={self.id} don\'t answer')
             return bytes(all_data)

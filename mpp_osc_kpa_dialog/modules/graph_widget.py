@@ -16,9 +16,6 @@ except:
 
 
 class GraphWidget(QtWidgets.QWidget):
-    vLayout_hist_EdE            : QtWidgets.QVBoxLayout
-    vLayout_hist_pips           : QtWidgets.QVBoxLayout
-    vLayout_hist_sipm           : QtWidgets.QVBoxLayout
     vLayout_pips                : QtWidgets.QVBoxLayout
     vLayout_sipm                : QtWidgets.QVBoxLayout
 
