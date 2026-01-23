@@ -81,7 +81,7 @@
       </widget>
      </item>
      <item row="3" column="2">
-      <widget class="QPushButton" name="pushButton_run">
+      <widget class="QPushButton" name="pushButton_run_trig">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -107,7 +107,7 @@
         <string notr="true">font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
        </property>
        <property name="text">
-        <string>Начать изм.</string>
+        <string>Запуск. изм.</string>
        </property>
       </widget>
      </item>

@@ -29,8 +29,8 @@ class GraphWidget(QtWidgets.QWidget):
         loadUi(Path(__file__).parent.joinpath('graph_widget.ui'), self)
         self.task = None # type: ignore
 
-        self.gp_ch1 = GraphPen(self.vLayout_pips, name = "ch1", color = (255, 255, 0))
-        self.gp_ch2 = GraphPen(self.vLayout_sipm, name = "ch2", color = (0, 255, 255))
+        self.gp_ch0 = GraphPen(self.vLayout_pips, name = "ch0", color = (255, 255, 0))
+        self.gp_ch1 = GraphPen(self.vLayout_sipm, name = "ch1", color = (0, 255, 255))
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)

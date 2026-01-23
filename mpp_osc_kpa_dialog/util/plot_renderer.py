@@ -1,14 +1,10 @@
 import pyqtgraph as pg
 from PyQt6 import QtWidgets
 from qasync import asyncSlot
-import asyncio
-# from src.write_data_to_file import writer_graph_data, write_to_hdf5_file, read_hdf5_file, hdf5_to_csv
 from pathlib import Path
-import os
-import datetime
-import sys
-import qtmodern
+
 import numpy as np
+from typing import Optional, Sequence, Callable, Union
 
 
 class GraphPen():
@@ -31,34 +27,39 @@ class GraphPen():
         # self.path_to_save: Path = self.parent_path / time
 
     @asyncSlot()
-    async def draw_graph(self,
-                        data: list[int | float],
-                        name_file_save_data: str = "",
-                        clear: bool = True) -> None:
-        '''Обновляет поле графика
-        Parameters:
-        clear (bool) = True: если False, то перед отрисовкой графика поле графика не очищается
-        '''
-        x, y = await self.graph_data_complit(data)
-        if clear:
-            self.plt_widget.clear()
-        if name_file_save_data:
-            # write_to_hdf5_file([x, y], self.name_frame, self.parent_path, name_file_save_data)
-            # hdf5_to_csv(self.parent_path/Path(f"{name_file_save_data}.phd5"))
-            pass
-        data_line = self.plt_widget.plot(x, y, pen=self.pen)
-        data_line.setData(x, y)  # обновляем данные графика
-        # self.plt_widget.addItem(v_line) # линия уровня
-        #
-    @asyncSlot()
-    async def graph_data_complit(self, data: list[int | float]) -> tuple[list[int|float], list[int|float]]:
-        x: list = []
-        y: list = []
+    async def draw_graph(self, data: list, name_file_save_data: Optional[str] = None, name_data: Optional[str] = None, path_to_save: Optional[Path] = None, save_log=False, clear=False) -> tuple[list, list]:
+        if save_log and path_to_save:
+            self.path_to_save: Path = path_to_save
+        try:
+            if any(isinstance(item, float) for item in data):
+                data = list(map(int, data))
+                # print(f"Данные преобразованы в int")
+            x, y = await self._prepare_graph_data(data)
+            if clear:
+                self.plt_widget.clear()
+                self.plot_item = None
+            if save_log:
+                # self._save_graph_data(x, y, name_file_save_data, name_data)
+                pass
+            if self.plot_item == None:
+                self.plot_item = pg.PlotDataItem(x, y, pen = self.pen)
+                self.plt_widget.addItem(self.plot_item)
+            else:
+                self.plot_item.setData(self.plot_item)
+            # self.plt_widget.plot(x, y, pen=self.pen)
+            return x, y
+        except Exception as e:
+            print(f"Ошибка отрисовки: {e}")
+            return [],[]
+    
+    async def _prepare_graph_data(self, data):
+        """Подготовка данных для графика"""
+        x, y = [], []
         for index, value in enumerate(data):
-            if value > 4000:
-                value = 0
             x.append(index)
-            y.append(value)
+            y.append(0 if value&0xFFF > 4000 else value&0xFFF)
+            # self.delete_big_bytes(value)
+            # y.append(value)
         return x, y
 
 class HistPen():
