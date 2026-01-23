@@ -36,7 +36,7 @@ class ModbusMPPCommand(EnvironmentVar):
                 answer: ModbusFrame | None = await self.modbus.read_modbus(self.id, 3, 64, reg_addr)
                 # await asyncio.sleep(0.1)
                 if answer:
-                    all_data.extend(answer._raw_data)
+                    all_data.extend(answer._raw_data[3:-2])
                 else:
                     logger.error(f'Mpdule with id={self.id} don\'t answer')
             return bytes(all_data)
