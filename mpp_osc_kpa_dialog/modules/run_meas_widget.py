@@ -48,13 +48,13 @@ class RunMaesWidget(QtWidgets.QWidget):
         self.fd = FiltersData()
         self.measure_widget = MeasureWidget()
         # --------------------- init mpp id --------------------- #
-        modules_mpp = {'МПП-1': 4, 'МПП-2': 5, 'МПП-3': 6, 'МПП-4': 7,'МПП-5': 8, 'МПП-6': 9, 'МПП-7': 3}
+        self.modules_mpp = {'МПП-1': 4, 'МПП-2': 5, 'МПП-3': 6, 'МПП-4': 7,'МПП-5': 8, 'МПП-6': 9, 'МПП-7': 3}
         try:
             self.lineEdit_ID : QtWidgets.QLineEdit # for run_meas_widget_comm.ui
             self.id = int(self.lineEdit_ID.text())
         except Exception:
             self.comboBox_module_mpp : QtWidgets.QComboBox  # for run_meas_widget_bdk2.ui
-            self.comboBox_module_mpp.addItems(modules_mpp.keys())
+            self.comboBox_module_mpp.addItems(self.modules_mpp.keys())
         # ====================================================== #
         # --------------------- init client --------------------- #
         try:
@@ -63,7 +63,7 @@ class RunMaesWidget(QtWidgets.QWidget):
             logger.error(e)
         # ====================================================== #
         # --------------- init external functions --------------- #
-        mpp_id: int = modules_mpp[self.comboBox_module_mpp.currentText()]
+        mpp_id: int = self.modules_mpp[self.comboBox_module_mpp.currentText()]
         self.mpp_cmd: ModbusMPPCommand = ModbusMPPCommand(self.modbus, mpp_id)
         # ====================================================== #
         # --------------------- init flags --------------------- #
@@ -83,8 +83,9 @@ class RunMaesWidget(QtWidgets.QWidget):
         self.init_flags()
         # ====================================================== #
         self.pushButton_run_trig.clicked.connect(self.pushButton_run_trig_handler)
-        self.comboBox_module_mpp.editTextChanged
+        self.comboBox_module_mpp.currentIndexChanged.connect(self.comboBox_module_mpp_updater)
 
+    
     def init_flags(self):
         for checkBox, flag in self.checkbox_flag_mapping.items():
             checkBox.setChecked(self.flags[flag])
@@ -120,6 +121,9 @@ class RunMaesWidget(QtWidgets.QWidget):
             await self.mpp_cmd.start_measure(ch=0, state=0)
             await self.mpp_cmd.start_measure(ch=1, state=0)
 
+    def comboBox_module_mpp_updater(self):
+        mpp_id: int = self.modules_mpp[self.comboBox_module_mpp.currentText()]
+        self.mpp_cmd: ModbusMPPCommand = ModbusMPPCommand(self.modbus, mpp_id)
 
     def start_async_task_loop_request(self) -> None:
         ACQ_task: Callable[[], Awaitable[None]] = self.asyncio_ACQ_loop_request
@@ -149,12 +153,12 @@ class RunMaesWidget(QtWidgets.QWidget):
     async def _forced_start(self):
         bool_trg1, bool_trg2 = self.flags[self.trig1_flag], self.flags[self.trig2_flag]
         if (bool_trg1, bool_trg2) == (False, True):
-            await self.mpp_cmd.start_forced(ch=0, state=1)
+            await self.mpp_cmd.start_forced(ch=0)
         elif (bool_trg1, bool_trg2) == (True, False):
-            await self.mpp_cmd.start_forced(ch=1, state=1)
+            await self.mpp_cmd.start_forced(ch=1)
         elif (bool_trg1, bool_trg2) == (False, False):
-            await self.mpp_cmd.start_forced(ch=0, state=1)
-            await self.mpp_cmd.start_forced(ch=1, state=1)
+            await self.mpp_cmd.start_forced(ch=0)
+            await self.mpp_cmd.start_forced(ch=1)
 
     async def asyncio_ACQ_loop_request(self) -> None:
             self.graph_widget.show()

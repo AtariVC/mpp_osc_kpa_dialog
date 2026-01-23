@@ -20,14 +20,15 @@ class ModbusMPPCommand(EnvironmentVar):
     def complete_cmd(ch:int, cmd_reg:int, param:int|list|None = None):
         cmd = (0,)
         if isinstance(param, int): 
-            cmd = (((ch & 0xFF)<<4 )|(cmd_reg & 0xFF), param)
+            cmd = (((ch & 0xFF)<<8 )|(cmd_reg & 0xFF), param)
         if isinstance(param, list): 
-            cmd = tuple([((ch & 0xFF)<<4 )|(cmd_reg & 0xFF)] + param)
+            cmd = tuple([((ch & 0xFF)<<8 )|(cmd_reg & 0xFF)] + param)
         if param is None: 
-            cmd = (((ch & 0xFF)<<4 )|(cmd_reg & 0xFF),)
+            cmd = (((ch & 0xFF)<<8 )|(cmd_reg & 0xFF),)
         return struct.pack('>'+'H'*len(cmd), *cmd)
 
     async def read_oscill(self, ch: int = 0) -> bytes:
+        # TODO: убрать эхо
         try:
             all_data = bytearray()
             for offset in range(0, 512, 64):
@@ -65,7 +66,7 @@ class ModbusMPPCommand(EnvironmentVar):
         except Exception as e:
             logger.error(e)
             
-    async def start_forced(self, ch:Literal[0, 1], state:int) -> None:
+    async def start_forced(self, ch:Literal[0, 1]) -> None:
         data = self.complete_cmd(ch, self.MPP_FORCED_START)
         try:
             answer: ModbusFrame | None = await self.modbus.write_modbus(self.id, 16, 0, data)
