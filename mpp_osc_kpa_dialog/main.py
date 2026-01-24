@@ -42,11 +42,15 @@ class MPP_Osc_Dialog(Module_Backend):
 
     coroutine_get_temp_finished = QtCore.pyqtSignal()
 
-    def __init__(self, parent, **kwargs) -> None:
-        self.module_driver: Internal_Bus_Driver = Internal_Bus_Driver(**kwargs)
-        self.label = 'mpp diagrammer'
+    def __init__(self, parent, driver: Internal_Bus_Driver | None = None,
+                 **kwargs) -> None:
+        self.parent = parent
+        if driver is None:
+            driver = self._resolve_shared_driver(parent) or Internal_Bus_Driver(**kwargs)
+        self.label = 'mppOsc'
         super().__init__(self.label,
                          path=Path(__file__).parent.joinpath('main.ui'),
+                         driver=driver,
                          **kwargs)
         # loadUi(Path(__file__).parent.joinpath('main.ui'), self)
         # add button on kpa_async_pyqt_client.impact
@@ -61,6 +65,15 @@ class MPP_Osc_Dialog(Module_Backend):
         #     logger.error(e)
         self.init_widgets()
 
+    @staticmethod
+    def _resolve_shared_driver(parent) -> Internal_Bus_Driver | None:
+        if parent is None:
+            return None
+        if hasattr(parent, "internal_bus_module"):
+            return parent.internal_bus_module.module_driver
+        if hasattr(parent, "parent") and hasattr(parent.parent, "internal_bus_module"):
+            return parent.parent.internal_bus_module.module_driver
+        return None
 
     def init_widgets(self) -> None:
         # Виджеты
