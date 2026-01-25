@@ -129,7 +129,7 @@ class RunMaesWidget(QtWidgets.QWidget):
         ACQ_task: Callable[[], Awaitable[None]] = self.asyncio_ACQ_loop_request
         self.task_manager.create_task(ACQ_task(), "ACQ_task")
 
-    async def _trig_start(self):
+    async def _set_level(self):
         bool_trg1, bool_trg2 = self.flags[self.trig1_flag], self.flags[self.trig2_flag]
         lvl1 = int(self.lineEdit_triger_ch1.text())
         lvl2 = int(self.lineEdit_triger_ch2.text())
@@ -137,20 +137,16 @@ class RunMaesWidget(QtWidgets.QWidget):
         if (bool_trg1, bool_trg2) == (True, True):
             await self.mpp_cmd.set_level(ch=0, lvl=lvl1)
             await self.mpp_cmd.set_level(ch=1, lvl=lvl2)
-            await self.mpp_cmd.start_measure(ch=0, state=1)
-            await self.mpp_cmd.start_measure(ch=1, state=1)
+            # await self.mpp_cmd.start_measure(ch=0, state=1)
+            # await self.mpp_cmd.start_measure(ch=1, state=1)
         elif (bool_trg1, bool_trg2) == (True, False):
             await self.mpp_cmd.set_level(ch=0, lvl=lvl1)
-            await self.mpp_cmd.set_level(ch=1, lvl=lvl2)
-            await self.mpp_cmd.start_measure(ch=0, state=1)
-            await self.mpp_cmd.start_measure(ch=1, state=1)
+            # await self.mpp_cmd.start_measure(ch=0, state=1)
         elif (bool_trg1, bool_trg2) == (False, True):
-            await self.mpp_cmd.set_level(ch=0, lvl=lvl1)
             await self.mpp_cmd.set_level(ch=1, lvl=lvl2)
-            await self.mpp_cmd.start_measure(ch=0, state=1)
-            await self.mpp_cmd.start_measure(ch=1, state=1)
+            # await self.mpp_cmd.start_measure(ch=1, state=1)
 
-    async def _forced_start(self):
+    async def _start_forced_measure(self):
         bool_trg1, bool_trg2 = self.flags[self.trig1_flag], self.flags[self.trig2_flag]
         if (bool_trg1, bool_trg2) == (False, True):
             await self.mpp_cmd.start_forced(ch=0)
@@ -162,9 +158,9 @@ class RunMaesWidget(QtWidgets.QWidget):
 
     async def asyncio_ACQ_loop_request(self) -> None:
             self.graph_widget.show()
-            await self._trig_start()
+            await self._set_level()
             while 1:
-                await self._forced_start()
+                await self._start_forced_measure()
                 result_ch0: bytes = await self.mpp_cmd.read_oscill(ch=0)
                 result_ch1: bytes = await self.mpp_cmd.read_oscill(ch=1)
                 result_ch0_int: list[int] = await self.parser.mpp_pars_16b(result_ch0)
