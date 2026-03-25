@@ -24,6 +24,6 @@ dependencies = [
 "*" = ["*.ui", "*.svg", "*.ico", "*.png", "*.qss"]
 
 [tool.uv.sources]
-kpa-async-pyqt-client = { git = "https://github.com/OAI-NSU/KPA_Async_PyQt_Client.git" }
+kpa-async-pyqt-client = { git = "https://github.com/AtariVC/KPA_Async_PyQt_Client.git" }
 
 

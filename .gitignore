@@ -53,3 +53,4 @@ cython_debug/
 
 # C extensions
 *.so
+.vscode/KPA_Async_PyQt_Client.code-workspace
