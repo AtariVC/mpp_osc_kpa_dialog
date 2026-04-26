@@ -52,6 +52,7 @@ class MPP_Osc_Dialog(Module_Backend):
                          path=Path(__file__).parent.joinpath('main.ui'),
                          driver=driver,
                          **kwargs)
+        self._force_uart_suppress_echo()
         # loadUi(Path(__file__).parent.joinpath('main.ui'), self)
         # add button on kpa_async_pyqt_client.impact
         # try:
@@ -74,6 +75,23 @@ class MPP_Osc_Dialog(Module_Backend):
         if hasattr(parent, "parent") and hasattr(parent.parent, "internal_bus_module"):
             return parent.parent.internal_bus_module.module_driver
         return None
+
+    def _force_uart_suppress_echo(self) -> None:
+        uart = getattr(self.module_driver, "uart1", None)
+        transaction = getattr(uart, "transaction", None)
+        if uart is None or transaction is None or getattr(transaction, "_mpp_forced_suppress_echo", False):
+            return
+
+        original_transaction = transaction
+
+        async def transaction_with_suppressed_echo(*args, **kwargs):
+            # Internal bus backend passes the checkbox state into supress_echo.
+            # Override it on the shared UART instance without editing the dependency.
+            kwargs["supress_echo"] = True
+            return await original_transaction(*args, **kwargs)
+
+        transaction_with_suppressed_echo._mpp_forced_suppress_echo = True
+        uart.transaction = transaction_with_suppressed_echo
 
     def init_widgets(self) -> None:
         # Виджеты
